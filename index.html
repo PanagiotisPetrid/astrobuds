@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>vOcean Planet | AstroBuds</title>
+    <title>Ocean Planet | AstroBuds</title>
     <style>
         body { margin: 0; overflow: hidden; }
         canvas { display: block; }
@@ -158,6 +158,12 @@ document.getElementById('close-popup').addEventListener('click', (event) => {
     redDot.visible = true;
 });
 
+// Ensure the popup doesn't block clicks when hidden
+function preventPopupBlocking() {
+    const popup = document.getElementById('popup');
+    popup.style.pointerEvents = 'none';  // Disable pointer events when hidden
+}
+
 // Listen for mouse clicks on the planet and red dot
 window.addEventListener('click', onMouseClick);
 
@@ -170,6 +176,7 @@ function animate() {
 
 // Start animation loop
 animate();
+preventPopupBlocking();  // Ensure popup doesn't block clicks when hidden
 </script>
 
 </body>
