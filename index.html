@@ -98,11 +98,13 @@ loader.load('scene.gltf', (gltf) => {
     loadedModel = gltf.scene;
     // Set the scale and position of the model on the surface of the planet
     loadedModel.scale.set(0.5, 0.5, 0.5);  // Adjust scale as needed
-    loadedModel.position.set(0, 5, 0);     // Adjust position on the surface
+    loadedModel.position.set(3.5, 5, 3.5);  // Adjust position to upper right quadrant
+    loadedModel.rotation.y = Math.PI / 4;  // Optional: Rotate the model for better visibility
     scene.add(loadedModel);
 }, undefined, (error) => {
     console.error('An error happened while loading the model:', error);
 });
+
 
 // Handle clicks on the planet
 function onMouseClick(event) {
