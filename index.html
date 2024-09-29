@@ -18,7 +18,7 @@
             padding: 20px;
             border: 1px solid black;
             border-radius: 5px;
-            z-index: 10; /* Ensure it is above the canvas */
+            z-index: 10;
         }
 
         #close-popup {
@@ -30,20 +30,20 @@
         #info-image {
             padding-left: 100px;
             position: absolute;
-            top: 50%;  /* Center vertically */
-            left: 20px; /* Keep it on the left side */
-            width: 400px; /* Adjust size as needed */
-            height: auto; /* Maintain aspect ratio */
-            transform: translateY(-50%); /* Center vertically by offsetting */
-            display: none; /* Initially hidden */
-            transition: opacity 2s; /* Fade transition */
-            z-index: 10; /* Ensure it is above the canvas */
+            top: 50%;
+            left: 20px; 
+            width: 400px; 
+            height: auto;
+            transform: translateY(-50%); 
+            display: none; 
+            transition: opacity 2s;
+            z-index: 10;
         }
     </style>
 </head>
 <body>
 
-<!-- Popup for feature information -->
+
 <div id="popup">
     <span id="close-popup">&times;</span>
     <p id="popup-text">Feature information</p>
@@ -52,12 +52,11 @@
 <!-- Image to display based on quadrant -->
 <img id="info-image" src="" alt="Quadrant Info Image">
 
-<!-- Include Three.js and Tween.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
 
 <script>
-// Basic Three.js setup
+
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -65,7 +64,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setClearColor(0x0d1227, 1);  // Dark blue background
 document.body.appendChild(renderer.domElement);
 
-// Create the planet
+// Create planet
 const geometry = new THREE.SphereGeometry(5, 64, 64);  // Higher detail sphere
 const texture = new THREE.TextureLoader().load('ocean_planet_texture.png', () => {
     renderer.render(scene, camera);  // Render after texture loads
@@ -74,68 +73,56 @@ const material = new THREE.MeshBasicMaterial({ map: texture });
 const planet = new THREE.Mesh(geometry, material);
 scene.add(planet);
 
-// Camera original position and closer position variables
+// Camera original position
 const cameraInitialPosition = { x: 0, y: 0, z: 10 };
-const cameraClosePosition = { x: 0, y: 0, z: 5 };  // Move closer to planet
+const cameraClosePosition = { x: 0, y: 0, z: 5 }; 
 
-// Set camera to its initial position
 camera.position.set(cameraInitialPosition.x, cameraInitialPosition.y, cameraInitialPosition.z);
 
-// Lighting
-const ambientLight = new THREE.AmbientLight(0x404040, 2);  // Ambient light with more intensity
+const ambientLight = new THREE.AmbientLight(0x404040, 2);  
 scene.add(ambientLight);
 
-const directionalLight = new THREE.DirectionalLight(0xffffff, 1);  // Strong directional light
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 directionalLight.position.set(1, 1, 1).normalize();
 scene.add(directionalLight);
 
-// Handle window resize
+
 window.addEventListener('resize', () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
 });
 
-// Raycaster setup for detecting clicks
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 
-// Handle clicks on the planet
 function onMouseClick(event) {
-    // Convert mouse position to normalized device coordinates (-1 to +1)
     mouse.x = -(event.clientX / window.innerWidth) * 2 + 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-    // Raycast to detect intersections with the planet
     raycaster.setFromCamera(mouse, camera);
     const intersects = raycaster.intersectObject(planet);
 
     if (intersects.length > 0) {
         const intersection = intersects[0].point;
 
-        // Determine which quadrant of the sphere was clicked
         let featureInfo;
         let imageSrc;
 
         if (intersection.x > 0 && intersection.y > 0) {
-            // Upper right quadrant
             featureInfo = 'Hydrothermal vents supply the ecosystem with CO2 and H2S. As water penetrates the bottom floor of the ocean, it makes its way closer to the nucleus of the planet. Through this process, it is enriched with minerals and organic compounds, which return to the ocean floor through hydrothermal vents and cold seeps.';
-            imageSrc = 'hydrothermal_vent.jpg'; // Replace with your image URL
+            imageSrc = 'hydrothermal_vent.jpg';
         } else if (intersection.x < 0 && intersection.y > 0) {
-            // Upper left quadrant
             featureInfo = 'H2 makes its way into the ecosystem through the hydrolysis of H2S or with the help of thermophilic hydrogen-producing bacteria.';
-            imageSrc = 'cold_seeps.jpg'; // Replace with your image URL
+            imageSrc = 'cold_seeps.jpg';
         } else if (intersection.x > 0 && intersection.y < 0) {
-            // Lower right quadrant
             featureInfo = 'The ecosystem is supplied with CH4 thanks to methanogens, as well as hydrothermal vents and cold seeps. Methanogens are methane-producing bacteria that rank among the simplest and most ancient organisms on Earth';
-            imageSrc = 'methanogens.png'; // Replace with your image URL
+            imageSrc = 'methanogens.png';
         } else if (intersection.x < 0 && intersection.y < 0) {
-            // Lower left quadrant
             featureInfo = 'For sulfur bacteria to produce glucose (C6H12O6) O2 is also needed. O2 is supplied to the ecosystem thanks to water radiolysis and oxygen-producing metals, as new study shows. The production of glucose allows the growth of more complex heterotrophic organisms.';
-            imageSrc = 'riftia.png'; // Replace with your image URL
+            imageSrc = 'riftia.png';
         }
 
-        // Smoothly rotate the planet and zoom the camera
         const targetRotationX = Math.atan2(intersection.y, intersection.z);
         const targetRotationY = Math.atan2(intersection.x, intersection.z);
         
@@ -149,79 +136,68 @@ function onMouseClick(event) {
             .easing(TWEEN.Easing.Quadratic.Out)
             .start();
 
-        // Display the popup with the corresponding message
+        // Display the popup with message
         showPopup(featureInfo, event.clientX, event.clientY);
         showImage(imageSrc);
     }
 }
 
-// Show popup at the clicked position
 function showPopup(content, x, y) {
     const popup = document.getElementById('popup');
     popup.style.left = x + 'px';
     popup.style.top = y + 'px';
     document.getElementById('popup-text').innerText = content;
-    popup.style.display = 'block';  // Make the popup visible
+    popup.style.display = 'block'; 
 }
 
-// Show image based on the clicked quadrant
 function showImage(src) {
     const image = document.getElementById('info-image');
     image.src = src;
 
-    // If the image is currently displayed, fade it out first
     if (image.style.display === 'block') {
-        image.style.opacity = 0;  // Start fading out
+        image.style.opacity = 0;
         setTimeout(() => {
-            image.style.display = 'block';  // Ensure the new image is visible
-            image.src = src; // Change the image source
-            image.style.opacity = 1;  // Start fading in
-        }, 2000); // Wait for fade-out to complete before changing the image
+            image.style.display = 'block'; 
+            image.src = src;
+            image.style.opacity = 1; 
+        }, 2000);
     } else {
-        image.style.display = 'block';  // Show the image for the first time
-        image.style.opacity = 1;  // Fully opaque
+        image.style.display = 'block';
+        image.style.opacity = 1; 
     }
 }
 
-// Add event listener for close button
 document.getElementById('close-popup').addEventListener('click', (event) => {
-    event.stopPropagation();  // Prevent the globe from rotating on this click
+    event.stopPropagation(); 
     const popup = document.getElementById('popup');
-    popup.style.display = 'none';  // Hide popup when close button is clicked
+    popup.style.display = 'none'; 
 
-    // Hide the image
     const image = document.getElementById('info-image');
-    image.style.opacity = 0;  // Start fading out the image
+    image.style.opacity = 0; 
 
-    // Fade out the image after 2 seconds
     setTimeout(() => {
-        image.style.display = 'none';  // Hide the image completely
-    }, 2000); // Wait for the fade-out to finish
+        image.style.display = 'none';
+    }, 2000);
 
-    // Reset the planet's rotation to its initial state
     new TWEEN.Tween(planet.rotation)
         .to({ x: 0, y: 0, z: 0 }, 1000)
         .easing(TWEEN.Easing.Quadratic.Out)
         .start();
 
-    // Move camera back to its original position
     new TWEEN.Tween(camera.position)
         .to(cameraInitialPosition, 1000)
         .easing(TWEEN.Easing.Quadratic.Out)
         .start();
 });
 
-// Listen for mouse clicks on the planet
 window.addEventListener('click', onMouseClick);
 
-// Animation loop to render the scene and update Tween.js animations
 function animate() {
     requestAnimationFrame(animate);
     TWEEN.update();
     renderer.render(scene, camera);
 }
 
-// Start animation loop
 animate();
 </script>
 
