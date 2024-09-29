@@ -23,6 +23,16 @@
             float: right;
             font-size: 20px;
         }
+
+        #info-image {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 200px; /* Adjust size as needed */
+            display: none; /* Initially hidden */
+            transition: opacity 2s; /* Fade transition */
+            z-index: 10; /* Ensure it is above the canvas */
+        }
     </style>
 </head>
 <body>
@@ -32,6 +42,9 @@
     <span id="close-popup">&times;</span>
     <p id="popup-text">Feature information</p>
 </div>
+
+<!-- Image to display based on quadrant -->
+<img id="info-image" src="" alt="Quadrant Info Image">
 
 <!-- Include Three.js and Tween.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -43,7 +56,7 @@ const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setClearColor(0x021732, 1);  // Black background
+renderer.setClearColor(0x000000, 1);  // Black background
 document.body.appendChild(renderer.domElement);
 
 // Create the planet
@@ -61,13 +74,6 @@ const cameraClosePosition = { x: 0, y: 0, z: 5 };  // Move closer to planet
 
 // Set camera to its initial position
 camera.position.set(cameraInitialPosition.x, cameraInitialPosition.y, cameraInitialPosition.z);
-
-// Store the initial rotation of the planet
-const initialRotation = {
-    x: planet.rotation.x,
-    y: planet.rotation.y,
-    z: planet.rotation.z
-};
 
 // Lighting
 const ambientLight = new THREE.AmbientLight(0x404040, 2);  // Ambient light with more intensity
@@ -103,29 +109,35 @@ function onMouseClick(event) {
 
         // Determine which quadrant of the sphere was clicked
         let featureInfo;
+        let imageSrc;
+
         if (intersection.x > 0 && intersection.y > 0) {
             // Upper right quadrant
-            featureInfo = 'This is the upper right quadrant of the Ocean Planet. Placeholder for more detailed information.';
+            featureInfo = 'This is the upper right quadrant of the Ocean Planet.';
+            imageSrc = 'upper_right_image.png'; // Replace with your image URL
         } else if (intersection.x < 0 && intersection.y > 0) {
             // Upper left quadrant
-            featureInfo = 'This is the upper left quadrant of the Ocean Planet. Placeholder for more detailed information.';
+            featureInfo = 'This is the upper left quadrant of the Ocean Planet.';
+            imageSrc = 'upper_left_image.png'; // Replace with your image URL
         } else if (intersection.x > 0 && intersection.y < 0) {
             // Lower right quadrant
-            featureInfo = 'This is the lower right quadrant of the Ocean Planet. Placeholder for more detailed information.';
+            featureInfo = 'This is the lower right quadrant of the Ocean Planet.';
+            imageSrc = 'lower_right_image.png'; // Replace with your image URL
         } else if (intersection.x < 0 && intersection.y < 0) {
             // Lower left quadrant
-            featureInfo = 'This is the lower left quadrant of the Ocean Planet. Placeholder for more detailed information.';
+            featureInfo = 'This is the lower left quadrant of the Ocean Planet.';
+            imageSrc = 'lower_left_image.png'; // Replace with your image URL
         }
 
-        // Smoothly rotate the planet using Tween.js
+        // Smoothly rotate the planet and zoom the camera
         const targetRotationX = Math.atan2(intersection.y, intersection.z);
         const targetRotationY = Math.atan2(intersection.x, intersection.z);
+        
         new TWEEN.Tween(planet.rotation)
             .to({ x: targetRotationX, y: targetRotationY }, 1000)
             .easing(TWEEN.Easing.Quadratic.Out)
             .start();
 
-        // Move camera closer to the planet
         new TWEEN.Tween(camera.position)
             .to(cameraClosePosition, 1000)
             .easing(TWEEN.Easing.Quadratic.Out)
@@ -133,6 +145,7 @@ function onMouseClick(event) {
 
         // Display the popup with the corresponding message
         showPopup(featureInfo, event.clientX, event.clientY);
+        showImage(imageSrc);
     }
 }
 
@@ -145,15 +158,37 @@ function showPopup(content, x, y) {
     popup.style.display = 'block';  // Make the popup visible
 }
 
+// Show image based on the clicked quadrant
+function showImage(src) {
+    const image = document.getElementById('info-image');
+    image.src = src;
+    image.style.display = 'block';  // Make the image visible
+    image.style.opacity = 0;  // Start with full transparency
+
+    // Fade in the image
+    setTimeout(() => {
+        image.style.opacity = 1;  // Fully opaque
+    }, 10); // Allow browser to register the change
+}
+
 // Add event listener for close button
 document.getElementById('close-popup').addEventListener('click', (event) => {
     event.stopPropagation();  // Prevent the globe from rotating on this click
     const popup = document.getElementById('popup');
     popup.style.display = 'none';  // Hide popup when close button is clicked
 
+    // Hide the image
+    const image = document.getElementById('info-image');
+    image.style.opacity = 0;  // Start fading out the image
+
+    // Fade out the image after 2 seconds
+    setTimeout(() => {
+        image.style.display = 'none';  // Hide the image completely
+    }, 2000); // Wait for the fade-out to finish
+
     // Reset the planet's rotation to its initial state
     new TWEEN.Tween(planet.rotation)
-        .to({ x: initialRotation.x, y: initialRotation.y, z: initialRotation.z }, 1000)
+        .to({ x: 0, y: 0, z: 0 }, 1000)
         .easing(TWEEN.Easing.Quadratic.Out)
         .start();
 
