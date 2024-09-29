@@ -70,7 +70,7 @@ scene.add(planet);
 
 // Camera original position and closer position variables
 const cameraInitialPosition = { x: 0, y: 0, z: 10 };
-const cameraClosePosition = { x: 0, y: 0, z: 5 };  // Move closer to planet
+const cameraClosePosition = { x: 0, y: 0, z: 7 };  // Move closer to planet
 
 // Set camera to its initial position
 camera.position.set(cameraInitialPosition.x, cameraInitialPosition.y, cameraInitialPosition.z);
@@ -114,19 +114,19 @@ function onMouseClick(event) {
         if (intersection.x > 0 && intersection.y > 0) {
             // Upper right quadrant
             featureInfo = 'This is the upper right quadrant of the Ocean Planet.';
-            imageSrc = 'hydrothermal_vent.jpg'; // Replace with your image URL
+            imageSrc = 'upper_right_image.png'; // Replace with your image URL
         } else if (intersection.x < 0 && intersection.y > 0) {
             // Upper left quadrant
             featureInfo = 'This is the upper left quadrant of the Ocean Planet.';
-            imageSrc = 'cold_seeps.jpg'; // Replace with your image URL
+            imageSrc = 'upper_left_image.png'; // Replace with your image URL
         } else if (intersection.x > 0 && intersection.y < 0) {
             // Lower right quadrant
             featureInfo = 'This is the lower right quadrant of the Ocean Planet.';
-            imageSrc = 'methanogens.png'; // Replace with your image URL
+            imageSrc = 'lower_right_image.png'; // Replace with your image URL
         } else if (intersection.x < 0 && intersection.y < 0) {
             // Lower left quadrant
             featureInfo = 'This is the lower left quadrant of the Ocean Planet.';
-            imageSrc = 'riftia.png'; // Replace with your image URL
+            imageSrc = 'lower_left_image.png'; // Replace with your image URL
         }
 
         // Smoothly rotate the planet and zoom the camera
@@ -162,13 +162,20 @@ function showPopup(content, x, y) {
 function showImage(src) {
     const image = document.getElementById('info-image');
     image.src = src;
-    image.style.display = 'block';  // Make the image visible
-    image.style.opacity = 0;  // Start with full transparency
 
-    // Fade in the image
-    setTimeout(() => {
+    const existingImage = image.style.display === 'block';
+    
+    // If there's an existing image, fade it out first
+    if (existingImage) {
+        image.style.opacity = 0;  // Start fading out
+        setTimeout(() => {
+            image.style.display = 'block';  // Show the new image
+            image.style.opacity = 1;  // Fade it in
+        }, 2000); // Wait for fade-out to complete before changing the image
+    } else {
+        image.style.display = 'block';  // Show the image for the first time
         image.style.opacity = 1;  // Fully opaque
-    }, 10); // Allow browser to register the change
+    }
 }
 
 // Add event listener for close button
