@@ -101,11 +101,25 @@ function onMouseClick(event) {
     if (intersects.length > 0) {
         const intersection = intersects[0].point;
 
-        // Calculate rotation angles based on the clicked point
-        const targetRotationX = Math.atan2(intersection.y, intersection.z);
-        const targetRotationY = Math.atan2(intersection.x, intersection.z);
+        // Determine which quadrant of the sphere was clicked
+        let featureInfo;
+        if (intersection.x > 0 && intersection.y > 0) {
+            // Upper right quadrant
+            featureInfo = 'This is the upper right quadrant of the Ocean Planet. Placeholder for more detailed information.';
+        } else if (intersection.x < 0 && intersection.y > 0) {
+            // Upper left quadrant
+            featureInfo = 'This is the upper left quadrant of the Ocean Planet. Placeholder for more detailed information.';
+        } else if (intersection.x > 0 && intersection.y < 0) {
+            // Lower right quadrant
+            featureInfo = 'This is the lower right quadrant of the Ocean Planet. Placeholder for more detailed information.';
+        } else if (intersection.x < 0 && intersection.y < 0) {
+            // Lower left quadrant
+            featureInfo = 'This is the lower left quadrant of the Ocean Planet. Placeholder for more detailed information.';
+        }
 
         // Smoothly rotate the planet using Tween.js
+        const targetRotationX = Math.atan2(intersection.y, intersection.z);
+        const targetRotationY = Math.atan2(intersection.x, intersection.z);
         new TWEEN.Tween(planet.rotation)
             .to({ x: targetRotationX, y: targetRotationY }, 1000)
             .easing(TWEEN.Easing.Quadratic.Out)
@@ -117,8 +131,7 @@ function onMouseClick(event) {
             .easing(TWEEN.Easing.Quadratic.Out)
             .start();
 
-        // Display popup with feature information
-        const featureInfo = `You clicked on the planet at position: (${intersection.x.toFixed(2)}, ${intersection.y.toFixed(2)}, ${intersection.z.toFixed(2)})`;
+        // Display the popup with the corresponding message
         showPopup(featureInfo, event.clientX, event.clientY);
     }
 }
@@ -150,14 +163,6 @@ document.getElementById('close-popup').addEventListener('click', (event) => {
         .easing(TWEEN.Easing.Quadratic.Out)
         .start();
 });
-
-// Handle clicks outside the popup to hide it
-window.addEventListener('click', (event) => {
-    if (!event.target.closest('#popup') && !event.target.closest('canvas')) {
-        const popup = document.getElementById('popup');
-        popup.style.display = 'none';  // Hide the popup if clicked outside
-    }
-}, true);
 
 // Listen for mouse clicks on the planet
 window.addEventListener('click', onMouseClick);
