@@ -79,7 +79,7 @@ const mouse = new THREE.Vector2();
 // Handle clicks on the planet
 function onMouseClick(event) {
     // Convert mouse position to normalized device coordinates (-1 to +1)
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.x = -(event.clientX / window.innerWidth) * 2 + 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
     // Raycast to detect intersections with the planet
