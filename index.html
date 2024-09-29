@@ -58,6 +58,13 @@ scene.add(planet);
 // Camera position - moving closer to the planet
 camera.position.set(0, 0, 10);  // Move the camera closer
 
+// Store the initial rotation of the planet
+const initialRotation = {
+    x: planet.rotation.x,
+    y: planet.rotation.y,
+    z: planet.rotation.z
+};
+
 // Lighting
 const ambientLight = new THREE.AmbientLight(0x404040, 2);  // Ambient light with more intensity
 scene.add(ambientLight);
@@ -120,6 +127,12 @@ document.getElementById('close-popup').addEventListener('click', (event) => {
     event.stopPropagation();  // Prevent the globe from rotating on this click
     const popup = document.getElementById('popup');
     popup.style.display = 'none';  // Hide popup when close button is clicked
+
+    // Reset the planet's rotation to its initial state
+    new TWEEN.Tween(planet.rotation)
+        .to({ x: initialRotation.x, y: initialRotation.y, z: initialRotation.z }, 1000)
+        .easing(TWEEN.Easing.Quadratic.Out)
+        .start();
 });
 
 // Handle clicks outside the popup to hide it
