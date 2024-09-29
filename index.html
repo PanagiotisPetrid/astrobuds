@@ -15,6 +15,7 @@
             padding: 10px;
             border: 1px solid black;
             border-radius: 5px;
+            z-index: 10; /* Ensure it is above the canvas */
         }
 
         #close-popup {
@@ -55,7 +56,7 @@ const planet = new THREE.Mesh(geometry, material);
 scene.add(planet);
 
 // Camera position - moving closer to the planet
-camera.position.set(0, 0, 10);  // Move the camera closer
+camera.position.set(0, 0, 8);  // Move the camera closer
 
 // Lighting
 const ambientLight = new THREE.AmbientLight(0x404040, 2);  // Ambient light with more intensity
@@ -115,7 +116,8 @@ function showPopup(content, x, y) {
 }
 
 // Add event listener for close button
-document.getElementById('close-popup').addEventListener('click', () => {
+document.getElementById('close-popup').addEventListener('click', (event) => {
+    event.stopPropagation();  // Prevent the globe from rotating on this click
     const popup = document.getElementById('popup');
     popup.style.display = 'none';  // Hide popup when close button is clicked
 });
