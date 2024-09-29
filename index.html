@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ocean Planet | AstroBuds</title>
+    <title>3D Planet Web App</title>
     <style>
         body { margin: 0; overflow: hidden; }
         canvas { display: block; }
@@ -48,15 +48,19 @@ document.body.appendChild(renderer.domElement);
 
 // Create the planet
 const geometry = new THREE.SphereGeometry(5, 64, 64);  // Higher detail sphere
-const texture = new THREE.TextureLoader().load('ocean_planet_texture.png', () => {
+const texture = new THREE.TextureLoader().load('earth_texture.jpg', () => {
     renderer.render(scene, camera);  // Render after texture loads
 });
 const material = new THREE.MeshBasicMaterial({ map: texture });
 const planet = new THREE.Mesh(geometry, material);
 scene.add(planet);
 
-// Camera position - moving closer to the planet
-camera.position.set(0, 0, 10);  // Move the camera closer
+// Camera original position and closer position variables
+const cameraInitialPosition = { x: 0, y: 0, z: 10 };
+const cameraClosePosition = { x: 0, y: 0, z: 5 };  // Move closer to planet
+
+// Set camera to its initial position
+camera.position.set(cameraInitialPosition.x, cameraInitialPosition.y, cameraInitialPosition.z);
 
 // Store the initial rotation of the planet
 const initialRotation = {
@@ -107,6 +111,12 @@ function onMouseClick(event) {
             .easing(TWEEN.Easing.Quadratic.Out)
             .start();
 
+        // Move camera closer to the planet
+        new TWEEN.Tween(camera.position)
+            .to(cameraClosePosition, 1000)
+            .easing(TWEEN.Easing.Quadratic.Out)
+            .start();
+
         // Display popup with feature information
         const featureInfo = `You clicked on the planet at position: (${intersection.x.toFixed(2)}, ${intersection.y.toFixed(2)}, ${intersection.z.toFixed(2)})`;
         showPopup(featureInfo, event.clientX, event.clientY);
@@ -131,6 +141,12 @@ document.getElementById('close-popup').addEventListener('click', (event) => {
     // Reset the planet's rotation to its initial state
     new TWEEN.Tween(planet.rotation)
         .to({ x: initialRotation.x, y: initialRotation.y, z: initialRotation.z }, 1000)
+        .easing(TWEEN.Easing.Quadratic.Out)
+        .start();
+
+    // Move camera back to its original position
+    new TWEEN.Tween(camera.position)
+        .to(cameraInitialPosition, 1000)
         .easing(TWEEN.Easing.Quadratic.Out)
         .start();
 });
