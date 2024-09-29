@@ -55,8 +55,15 @@ const material = new THREE.MeshBasicMaterial({ map: texture });
 const planet = new THREE.Mesh(geometry, material);
 scene.add(planet);
 
-// Camera position - moving closer to the planet
-camera.position.set(0, 0, 10);  // Move the camera closer
+// Camera initial position
+camera.position.set(0, 0, 10);
+
+// Store the initial rotation of the planet
+const initialRotation = {
+    x: planet.rotation.x,
+    y: planet.rotation.y,
+    z: planet.rotation.z
+};
 
 // Lighting
 const ambientLight = new THREE.AmbientLight(0x404040, 2);  // Ambient light with more intensity
@@ -77,33 +84,19 @@ window.addEventListener('resize', () => {
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 
-// Handle clicks on the planet
-function onMouseClick(event) {
+// Convert mouse position to normalized device coordinates and rotate the planet
+function rotatePlanetToMouse(event) {
     // Convert mouse position to normalized device coordinates (-1 to +1)
     mouse.x = -(event.clientX / window.innerWidth) * 2 + 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-    // Raycast to detect intersections with the planet
-    raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObject(planet);
+    // Rotate planet based on mouse click position (arbitrary scaling)
+    const targetRotation = new THREE.Vector3(mouse.y * Math.PI, mouse.x * Math.PI, 0);  // Rotate on X and Y axes
 
-    if (intersects.length > 0) {
-        const intersection = intersects[0].point;
-
-        // Calculate rotation angles based on the clicked point
-        const targetRotationX = Math.atan2(intersection.y, intersection.z);
-        const targetRotationY = Math.atan2(intersection.x, intersection.z);
-
-        // Smoothly rotate the planet using Tween.js
-        new TWEEN.Tween(planet.rotation)
-            .to({ x: targetRotationX, y: targetRotationY }, 1000)
-            .easing(TWEEN.Easing.Quadratic.Out)
-            .start();
-
-        // Display popup with feature information
-        const featureInfo = `You clicked on the planet at position: (${intersection.x.toFixed(2)}, ${intersection.y.toFixed(2)}, ${intersection.z.toFixed(2)})`;
-        showPopup(featureInfo, event.clientX, event.clientY);
-    }
+    new TWEEN.Tween(planet.rotation)
+        .to({ x: targetRotation.x, y: targetRotation.y, z: 0 }, 1000)
+        .easing(TWEEN.Easing.Quadratic.Out)
+        .start();
 }
 
 // Show popup at the clicked position
@@ -115,11 +108,19 @@ function showPopup(content, x, y) {
     popup.style.display = 'block';  // Make the popup visible
 }
 
-// Add event listener for close button
+// Add event listener for close button to reset the globe rotation when closed
 document.getElementById('close-popup').addEventListener('click', (event) => {
     event.stopPropagation();  // Prevent the globe from rotating on this click
+
+    // Hide popup when close button is clicked
     const popup = document.getElementById('popup');
-    popup.style.display = 'none';  // Hide popup when close button is clicked
+    popup.style.display = 'none';
+
+    // Reset the planet's rotation to its initial state
+    new TWEEN.Tween(planet.rotation)
+        .to({ x: initialRotation.x, y: initialRotation.y, z: initialRotation.z }, 1000)
+        .easing(TWEEN.Easing.Quadratic.Out)
+        .start();
 });
 
 // Handle clicks outside the popup to hide it
@@ -130,8 +131,13 @@ window.addEventListener('click', (event) => {
     }
 }, true);
 
-// Listen for mouse clicks on the planet
-window.addEventListener('click', onMouseClick);
+// Handle clicks on the planet and rotate the globe
+window.addEventListener('click', (event) => {
+    // Only rotate the planet when clicking on the canvas
+    if (event.target.closest('canvas')) {
+        rotatePlanetToMouse(event);
+    }
+});
 
 // Animation loop to render the scene and update Tween.js animations
 function animate() {
