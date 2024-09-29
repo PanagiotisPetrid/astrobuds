@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ocean Planet | AstroBuds</title>
+    <title>vOcean Planet | AstroBuds</title>
     <style>
         body { margin: 0; overflow: hidden; }
         canvas { display: block; }
@@ -30,7 +30,7 @@
 <!-- Popup for feature information -->
 <div id="popup">
     <span id="close-popup">&times;</span>
-    <p id="popup-text">Feature information</p>
+    <p id="popup-text">Placeholder for detailed information text.</p>
 </div>
 
 <!-- Include Three.js and Tween.js -->
@@ -55,9 +55,9 @@ const material = new THREE.MeshBasicMaterial({ map: texture });
 const planet = new THREE.Mesh(geometry, material);
 scene.add(planet);
 
-// Camera original position and closer position variables
+// Camera initial position and zoom-in position variables
 const cameraInitialPosition = { x: 0, y: 0, z: 10 };
-const cameraClosePosition = { x: 0, y: 0, z: 7 };  // Move closer to planet
+const cameraZoomPosition = { x: 2, y: 2, z: 5 };  // Adjusted for zoom-in effect on the red dot
 
 // Set camera to its initial position
 camera.position.set(cameraInitialPosition.x, cameraInitialPosition.y, cameraInitialPosition.z);
@@ -77,6 +77,15 @@ const directionalLight = new THREE.DirectionalLight(0xffffff, 1);  // Strong dir
 directionalLight.position.set(1, 1, 1).normalize();
 scene.add(directionalLight);
 
+// Create red dot on upper-right side of the planet (initial view)
+const dotGeometry = new THREE.SphereGeometry(0.1, 32, 32);  // Small red dot
+const dotMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+const redDot = new THREE.Mesh(dotGeometry, dotMaterial);
+
+// Position the dot on the upper-right of the planet (relative to initial view)
+redDot.position.set(3.5, 3.5, 5);
+scene.add(redDot);
+
 // Handle window resize
 window.addEventListener('resize', () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -88,38 +97,33 @@ window.addEventListener('resize', () => {
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 
-// Handle clicks on the planet
+// Handle clicks on the planet and the red dot
 function onMouseClick(event) {
     // Convert mouse position to normalized device coordinates (-1 to +1)
     mouse.x = -(event.clientX / window.innerWidth) * 2 + 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-    // Raycast to detect intersections with the planet
+    // Raycast to detect intersections with the planet and the red dot
     raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObject(planet);
+    const intersects = raycaster.intersectObjects([planet, redDot]);
 
     if (intersects.length > 0) {
-        const intersection = intersects[0].point;
+        const intersectedObject = intersects[0].object;
 
-        // Calculate rotation angles based on the clicked point
-        const targetRotationX = Math.atan2(intersection.y, intersection.z);
-        const targetRotationY = Math.atan2(intersection.x, intersection.z);
+        // Check if the red dot was clicked
+        if (intersectedObject === redDot) {
+            // Make the red dot disappear
+            redDot.visible = false;
 
-        // Smoothly rotate the planet using Tween.js
-        new TWEEN.Tween(planet.rotation)
-            .to({ x: targetRotationX, y: targetRotationY }, 1000)
-            .easing(TWEEN.Easing.Quadratic.Out)
-            .start();
+            // Zoom camera to the red dot position
+            new TWEEN.Tween(camera.position)
+                .to(cameraZoomPosition, 1000)
+                .easing(TWEEN.Easing.Quadratic.Out)
+                .start();
 
-        // Move camera closer to the planet
-        new TWEEN.Tween(camera.position)
-            .to(cameraClosePosition, 1000)
-            .easing(TWEEN.Easing.Quadratic.Out)
-            .start();
-
-        // Display popup with feature information
-        const featureInfo = `You clicked on the planet at position: (${intersection.x.toFixed(2)}, ${intersection.y.toFixed(2)}, ${intersection.z.toFixed(2)})`;
-        showPopup(featureInfo, event.clientX, event.clientY);
+            // Display popup with detailed information
+            showPopup('Detailed information about the red dot feature.', event.clientX, event.clientY);
+        }
     }
 }
 
@@ -149,17 +153,12 @@ document.getElementById('close-popup').addEventListener('click', (event) => {
         .to(cameraInitialPosition, 1000)
         .easing(TWEEN.Easing.Quadratic.Out)
         .start();
+
+    // Make the red dot visible again
+    redDot.visible = true;
 });
 
-// Handle clicks outside the popup to hide it
-window.addEventListener('click', (event) => {
-    if (!event.target.closest('#popup') && !event.target.closest('canvas')) {
-        const popup = document.getElementById('popup');
-        popup.style.display = 'none';  // Hide the popup if clicked outside
-    }
-}, true);
-
-// Listen for mouse clicks on the planet
+// Listen for mouse clicks on the planet and red dot
 window.addEventListener('click', onMouseClick);
 
 // Animation loop to render the scene and update Tween.js animations
