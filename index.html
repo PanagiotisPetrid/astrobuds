@@ -26,9 +26,11 @@
 
         #info-image {
             position: absolute;
-            top: 20px;
-            left: 20px;
-            width: 200px; /* Adjust size as needed */
+            top: 50%;  /* Center vertically */
+            left: 20px; /* Keep it on the left side */
+            width: 400px; /* Adjust size as needed */
+            height: auto; /* Maintain aspect ratio */
+            transform: translateY(-50%); /* Center vertically by offsetting */
             display: none; /* Initially hidden */
             transition: opacity 2s; /* Fade transition */
             z-index: 10; /* Ensure it is above the canvas */
@@ -70,7 +72,7 @@ scene.add(planet);
 
 // Camera original position and closer position variables
 const cameraInitialPosition = { x: 0, y: 0, z: 10 };
-const cameraClosePosition = { x: 0, y: 0, z: 7 };  // Move closer to planet
+const cameraClosePosition = { x: 0, y: 0, z: 5 };  // Move closer to planet
 
 // Set camera to its initial position
 camera.position.set(cameraInitialPosition.x, cameraInitialPosition.y, cameraInitialPosition.z);
